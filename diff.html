@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>Diff</title>
+    <style>
+        body {
+            margin: 20px;
+        }
+        .src {
+            display: flex;
+            align-items: center;
+        }
+        .column {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            margin: 20px;
+        }
+        .tool {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        label {
+            margin: 20px 0;
+        }
+        textarea {
+            height: 30vh;
+            resize: none;
+        }
+        button {
+            width: 100px;
+            height: 40px;
+            color: #fff;
+            background-color: #639ee2;
+            border-image: none;
+            cursor: pointer;
+            border: none;
+            outline: none;
+            margin: 0 20px;
+        }
+        button:active button:hover button:focus {
+            border: none;
+            outline: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="src">
+        <div class="column">
+            <label for="left">对比内容1 <span id="leftNum"></span></label>
+            <textarea name="left" id="left"></textarea>
+        </div>
+        <div class="column">
+            <label for="right">对比内容2 <span id="rightNum"></span></label>
+            <textarea name="right" id="right"></textarea>
+        </div>
+    </div>
+    <div class="tool">
+        <button onclick="handle()">去重</button>
+        <span id="handleNum"></span>
+    </div>
+    <div class="dst">
+        <div class="column">
+            <label for="bottom">去重结果 <span id="bottomNum"></span></label>
+            <textarea id="bottom"></textarea>
+        </div>
+    </div>
+</body>
+<script>
+    function handle() {
+        var leftEl = document.getElementById('left');
+        var rightEl = document.getElementById('right');
+        var bottomEl = document.getElementById('bottom');
+        var leftVal = leftEl.value || '';
+        var rightVal = rightEl.value || '';
+        bottomEl.value = compare(leftVal, rightVal);
+    }
+    function compare(left, right) {
+        var flag = false;
+        var res = '';
+        if(!left && !right) {
+            flag = true;
+        } else if(!left) {
+            flag = true;
+            res = right;
+        } else if(!right) {
+            flag = true;
+            res = left;
+        }
+        var leftNum = document.getElementById('leftNum');
+        var rightNum = document.getElementById('rightNum');
+        var bottomNum = document.getElementById('bottomNum');
+        var handleNum = document.getElementById('handleNum');
+        if (flag) {
+            leftNum.innerText = '';
+            rightNum.innerText = '';
+            bottomNum.innerText = '';
+            handleNum.innerText = '';
+            return res;
+        }
+        var larr = getArr(left);
+        var rarr = getArr(right);
+        leftNum.innerText = '(匹配 ' + larr.length + '个)';
+        rightNum.innerText = '(匹配 ' +  rarr.length + '个)';
+        var uarr = uniq(larr, rarr);
+        bottomNum.innerText = '(' + uarr.length + '个)';
+        handleNum.innerText = '(重复 ' + (larr.length + rarr.length - uarr.length) + '个)';
+        return uarr.join(', ');
+    }
+    function getArr(str) {
+        var reg = /([0-9a-f]{5})/ig;
+        var t = '';
+        var res = [];
+        while((t = reg.exec(str)) !== null) {
+            res.push(t[0]);
+        }
+        return res.sort();
+    }
+    function uniq(left, right) {
+        var res = left.concat(right);
+        return res.filter(function(item, index, arr) {
+            return arr.indexOf(item, 0) === index;
+        });
+    }
+</script>
+</html>
